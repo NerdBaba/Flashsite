@@ -1,0 +1,16 @@
+name = "flashsite"
+main = "server.js"
+compatibility_date = "2023-10-30"
+compatibility_flags = ["nodejs_compat"]
+
+[build]
+command = "npm run build"
+
+[vars]
+APP_PORT = "8080"
+
+[triggers]
+crons = []
+
+[env.production]
+name = "flashsite" 

@@ -397,12 +397,33 @@ app.post("/api/ask-ai", async (req, res) => {
     }
 
     if (selectedProvider.id !== "openai" && TOKENS_USED >= selectedProvider.max_tokens) {
-      console.log(`Error: Context too long for ${selectedProvider.name} (${TOKENS_USED} > ${selectedProvider.max_tokens})`);
-      return res.status(400).json({
-        ok: false,
-        openSelectProvider: true,
-        message: `Context is too long. ${selectedProvider.name} allow ${selectedProvider.max_tokens} max tokens.`,
-      });
+      // Special handling for Gemini models based on their specific token limits
+      if (selectedProvider.id === "gemini") {
+        let maxModelTokens = 8192; // Default for most Gemini models
+        
+        if (selectedModel.includes("2.5") && (selectedModel.includes("flash") || selectedModel.includes("pro"))) {
+          // Gemini 2.5 Flash and 2.5 Pro have 65,536 token output limit and can handle larger contexts
+          maxModelTokens = 65536;
+        }
+        
+        if (TOKENS_USED < maxModelTokens) {
+          console.log(`Using Gemini model with appropriate context: ${TOKENS_USED} tokens (limit: ${maxModelTokens})`);
+        } else {
+          console.log(`Error: Context too long for ${selectedModel} (${TOKENS_USED} > ${maxModelTokens})`);
+          return res.status(400).json({
+            ok: false,
+            openSelectProvider: true,
+            message: `Context is too long. ${selectedModel} allows ${maxModelTokens} max tokens.`,
+          });
+        }
+      } else {
+        console.log(`Error: Context too long for ${selectedProvider.name} (${TOKENS_USED} > ${selectedProvider.max_tokens})`);
+        return res.status(400).json({
+          ok: false,
+          openSelectProvider: true,
+          message: `Context is too long. ${selectedProvider.name} allow ${selectedProvider.max_tokens} max tokens.`,
+        });
+      }
     }
 
     // Check API keys for external providers

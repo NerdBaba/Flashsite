@@ -18,11 +18,22 @@ export class GeminiClient {
       console.log("GeminiClient: Using OpenAI compatibility endpoint");
       console.log("GeminiClient: Messages count:", messages.length);
       
+      // Determine appropriate max_tokens based on model
+      let maxTokens = 8192; // Default for most models (2.0 Flash, Gemma 3, etc.)
+      
+      if (model.includes("2.5") && (model.includes("flash") || model.includes("pro"))) {
+        // Gemini 2.5 Flash and 2.5 Pro have 65,536 token output limit
+        maxTokens = 65536;
+      }
+      
       const requestBody = {
         model: model,
         messages: messages,
-        stream: true
+        stream: true,
+        max_tokens: maxTokens
       };
+      
+      console.log(`GeminiClient: Using max_tokens=${maxTokens} for model ${model}`);
       
       console.log("GeminiClient: Request body prepared");
       
@@ -238,11 +249,21 @@ export class GeminiClient {
       console.log("GeminiClient: Using non-streaming OpenAI compatibility endpoint");
       console.log("GeminiClient: Messages count:", messages.length);
       
+      // Determine appropriate max_tokens based on model
+      let maxTokens = 8192; // Default for most models (2.0 Flash, Gemma 3, etc.)
+      
+      if (model.includes("2.5") && (model.includes("flash") || model.includes("pro"))) {
+        // Gemini 2.5 Flash and 2.5 Pro have 65,536 token output limit
+        maxTokens = 65536;
+      }
+      
+      console.log(`GeminiClient: Using max_tokens=${maxTokens} for model ${model}`);
+      
       const requestBody = {
         model: model,
         messages: messages,
         stream: false, // Non-streaming request
-        max_tokens: 8000 // Ensure we get a complete response
+        max_tokens: maxTokens
       };
       
       console.log("GeminiClient: Request body prepared for non-streaming request");

@@ -4,6 +4,7 @@ import classNames from "classnames";
 import { toast } from "react-toastify";
 import { FaPowerOff } from "react-icons/fa6";
 import { MdExpandMore } from "react-icons/md";
+import { FaGithub } from "react-icons/fa";
 
 import SpaceIcon from "@/assets/space.svg";
 import Loading from "../loading/loading";
@@ -32,12 +33,14 @@ function DeployButton({
   auth,
   setHtml,
   prompts,
+  githubUrl,
 }: {
   html: string;
   error: boolean;
   auth?: Auth;
   setHtml: (html: string) => void;
   prompts: string[];
+  githubUrl?: string;
 }) {
   const [spaceModalOpen, setSpaceModalOpen] = useState(false);
   const [cloudflareModalOpen, setCloudflareModalOpen] = useState(false);
@@ -103,6 +106,17 @@ function DeployButton({
 
   return (
     <div className="flex items-center justify-end gap-5">
+      {githubUrl && (
+        <a 
+          href={githubUrl}
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="flex items-center justify-center text-white hover:text-gray-300"
+          title="View source on GitHub"
+        >
+          <FaGithub size={20} />
+        </a>
+      )}
       <LoadButton auth={auth} setHtml={setHtml} setPath={setPath} />
       <div className="relative flex items-center justify-end">
         {auth &&

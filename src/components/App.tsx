@@ -306,6 +306,7 @@ function App() {
           auth={auth}
           setHtml={setHtml}
           prompts={prompts}
+          githubUrl="https://github.com/NerdBaba/Flashsite"
         />
       </Header>
       <main className="max-lg:flex-col flex w-full">

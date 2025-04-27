@@ -432,13 +432,22 @@ app.post("/api/ask-ai", async (req, res) => {
       const client = getAIClient(selectedProvider.id, token);
       let completeResponse = "";
 
-      // Prepare messages for API request
-      const messages = [
-        {
+      // Get system prompt content
+      const systemPromptContent = `ONLY USE HTML, CSS AND JAVASCRIPT. If you want to use ICON make sure to import the library first. Try to create the best UI possible by using only HTML, CSS and JAVASCRIPT. Use as much as you can TailwindCSS for the CSS, if you can't do something with TailwindCSS, then use custom CSS (make sure to import <script src="https://cdn.tailwindcss.com"></script> in the head). Also, try to ellaborate as much as you can, to create something unique. IMPORTANT: DO NOT USE MARKDOWN CODE BLOCKS. DO NOT START YOUR RESPONSE WITH \`\`\`html OR END IT WITH \`\`\`. JUST PROVIDE THE RAW HTML CONTENT DIRECTLY. ALWAYS GIVE THE RESPONSE AS A SINGLE HTML FILE.`;
+      
+      // Check if we're using a Gemma model with Gemini provider
+      const isGemmaModel = selectedProvider.id === "gemini" && selectedModel.includes("gemma");
+      
+      // Prepare messages for API request - handle special case for Gemma models
+      const messages = [];
+      
+      // Only add system message for non-Gemma models
+      if (!isGemmaModel) {
+        messages.push({
           role: "system",
-          content: `ONLY USE HTML, CSS AND JAVASCRIPT. If you want to use ICON make sure to import the library first. Try to create the best UI possible by using only HTML, CSS and JAVASCRIPT. Use as much as you can TailwindCSS for the CSS, if you can't do something with TailwindCSS, then use custom CSS (make sure to import <script src="https://cdn.tailwindcss.com"></script> in the head). Also, try to ellaborate as much as you can, to create something unique. IMPORTANT: DO NOT USE MARKDOWN CODE BLOCKS. DO NOT START YOUR RESPONSE WITH \`\`\`html OR END IT WITH \`\`\`. JUST PROVIDE THE RAW HTML CONTENT DIRECTLY. ALWAYS GIVE THE RESPONSE AS A SINGLE HTML FILE.`,
-        }
-      ];
+          content: systemPromptContent,
+        });
+      }
       
       if (previousPrompt) {
         messages.push({
@@ -454,10 +463,18 @@ app.post("/api/ask-ai", async (req, res) => {
         });
       }
       
-      messages.push({
-        role: "user",
-        content: prompt,
-      });
+      // For Gemma models, prepend system prompt to user prompt
+      if (isGemmaModel) {
+        messages.push({
+          role: "user",
+          content: `${systemPromptContent}\n\n${prompt}`,
+        });
+      } else {
+        messages.push({
+          role: "user",
+          content: prompt,
+        });
+      }
       
       console.log("Total messages:", messages.length);
       

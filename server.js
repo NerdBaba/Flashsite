@@ -399,23 +399,35 @@ app.post("/api/ask-ai", async (req, res) => {
     if (selectedProvider.id !== "openai" && TOKENS_USED >= selectedProvider.max_tokens) {
       // Special handling for Gemini models based on their specific token limits
       if (selectedProvider.id === "gemini") {
-        let maxModelTokens = 8192; // Default for most Gemini models
+        let maxOutputTokens = 8192; // Default output limit for most Gemini models
+        const maxInputTokens = 1000000; // All Gemini models support 1M input tokens
         
         if (selectedModel.includes("2.5") && (selectedModel.includes("flash") || selectedModel.includes("pro"))) {
-          // Gemini 2.5 Flash and 2.5 Pro have 65,536 token output limit and can handle larger contexts
-          maxModelTokens = 65536;
+          // Gemini 2.5 Flash and 2.5 Pro have 65,536 token output limit
+          maxOutputTokens = 65536;
         }
         
-        if (TOKENS_USED < maxModelTokens) {
-          console.log(`Using Gemini model with appropriate context: ${TOKENS_USED} tokens (limit: ${maxModelTokens})`);
-        } else {
-          console.log(`Error: Context too long for ${selectedModel} (${TOKENS_USED} > ${maxModelTokens})`);
+        // Check input context length
+        if (TOKENS_USED > maxInputTokens) {
+          console.log(`Error: Input context too long for ${selectedModel} (${TOKENS_USED} > ${maxInputTokens})`);
           return res.status(400).json({
             ok: false,
             openSelectProvider: true,
-            message: `Context is too long. ${selectedModel} allows ${maxModelTokens} max tokens.`,
+            message: `Input context is too long. ${selectedModel} allows ${maxInputTokens} max input tokens.`,
           });
         }
+        
+        // Check output token limit
+        if (TOKENS_USED > maxOutputTokens) {
+          console.log(`Error: Output limit exceeded for ${selectedModel} (${TOKENS_USED} > ${maxOutputTokens})`);
+          return res.status(400).json({
+            ok: false,
+            openSelectProvider: true,
+            message: `Output limit exceeded. ${selectedModel} allows ${maxOutputTokens} max output tokens.`,
+          });
+        }
+        
+        console.log(`Using Gemini model with appropriate context: ${TOKENS_USED} tokens (input limit: ${maxInputTokens}, output limit: ${maxOutputTokens})`);
       } else {
         console.log(`Error: Context too long for ${selectedProvider.name} (${TOKENS_USED} > ${selectedProvider.max_tokens})`);
         return res.status(400).json({

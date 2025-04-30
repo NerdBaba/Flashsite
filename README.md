@@ -2,9 +2,11 @@
 
 FlashSite is a powerful web-based tool for rapidly creating and deploying websites using AI. Built as an extension of [DeepSite](https://huggingface.co/spaces/enzostvs/deepsite), FlashSite adds several powerful features to enhance your web development workflow.
 
+
 ## 🚀 Features
 
 ### Core Functionality
+![Inference Provider - Settings](public/screenshot.png)
 - **AI-Powered Website Generation**: Quickly create websites by describing what you want
 - **Live Preview**: See your website take shape in real-time
 - **Code Editor**: Direct access to HTML/CSS/JS for fine-tuning

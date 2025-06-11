@@ -399,7 +399,7 @@ app.post("/api/ask-ai", async (req, res) => {
     if (selectedProvider.id !== "openai" && TOKENS_USED >= selectedProvider.max_tokens) {
       // Special handling for Gemini models based on their specific token limits
       if (selectedProvider.id === "gemini") {
-        let maxOutputTokens = 8192; // Default output limit for most Gemini models
+        let maxOutputTokens = 65536; // Default output limit for most Gemini models
         const maxInputTokens = 1000000; // All Gemini models support 1M input tokens
         
         if (selectedModel.includes("2.5") && (selectedModel.includes("flash") || selectedModel.includes("pro"))) {
